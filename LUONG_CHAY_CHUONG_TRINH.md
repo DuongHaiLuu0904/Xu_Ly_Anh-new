@@ -111,7 +111,7 @@ Kiểm tra ảnh gốc có tồn tại không
     ↓
 Chuyển RGB → BGR (OpenCV format)
     ↓
-Gọi xu_ly_anh_toi_uu.convert_to_sketch()
+Gọi xu_ly_anh_toi_uu.chuyen_thanh_phac_thao()
     ↓
 [9 BƯỚC XỬ LÝ ẢNH - Chi tiết bên dưới]
     ↓
@@ -128,7 +128,7 @@ Cập nhật thanh trạng thái: "⚡ Hoàn thành!"
 
 #### **Bước 1: Chuyển ảnh xám (Grayscale Conversion)**
 ```python
-rgb_to_grayscale(image_bgr)
+chuyen_rgb_sang_xam(anh_bgr)
 ```
 - Áp dụng công thức: `gray = 0.114*B + 0.587*G + 0.299*R`
 - Kết quả: Ảnh xám 1 kênh
@@ -137,7 +137,7 @@ rgb_to_grayscale(image_bgr)
 
 #### **Bước 2: Đảo ngược ảnh xám (Inversion)**
 ```python
-invert_image(gray_image)
+dao_nguoc_anh(anh_xam)
 ```
 - Công thức: `inverted = 255 - gray`
 - Tạo hiệu ứng âm bản (negative)
@@ -146,15 +146,17 @@ invert_image(gray_image)
 
 #### **Bước 3: Gaussian Blur (Làm mờ Gaussian)**
 ```python
-gaussian_blur(inverted_gray, kernel=15, sigma=3)
+lam_mo_gaussian(anh_xam_dao, kernel_gaussian=15, sigma_gaussian=3)
 ```
 **Thuật toán:**
 1. Tạo kernel Gaussian:
    - Kích thước: 15x15
    - Công thức: `G(x,y) = exp(-(x² + y²)/(2σ²))`
+   - Hàm: `tao_kernel_gaussian(kich_thuoc, sigma)`
 2. Áp dụng convolution 2D:
    - Padding: reflect mode
    - Convolution từng pixel
+   - Hàm: `ap_dung_tich_chap(anh, kernel)`
 
 **Mục đích:** Làm mờ ảnh để giảm nhiễu
 
@@ -162,7 +164,7 @@ gaussian_blur(inverted_gray, kernel=15, sigma=3)
 
 #### **Bước 4: Bilateral Filter (QUAN TRỌNG - CHẬM NHẤT)** ⚡
 ```python
-bilateral_filter_optimized(blurred, d=5, sigma_color=50, sigma_space=50)
+bo_loc_song_phuong_toi_uu(anh_mo, d=5, sigma_mau=50, sigma_khong_gian=50)
 ```
 
 **Các tối ưu hóa:**
@@ -201,7 +203,7 @@ Trong đó:
 
 #### **Bước 5: Đảo ngược ảnh đã làm mờ**
 ```python
-invert_image(blurred)
+dao_nguoc_anh(anh_mo)
 ```
 - Đảo ngược lại để chuẩn bị cho blending
 
@@ -209,7 +211,7 @@ invert_image(blurred)
 
 #### **Bước 6: Phát hiện cạnh (Edge Detection)**
 ```python
-detect_edges(gray_image)
+phat_hien_canh(anh_xam)
 ```
 **Thuật toán Sobel:**
 1. Kernel Sobel X (gradient ngang):
@@ -228,10 +230,10 @@ detect_edges(gray_image)
 
 3. Tính gradient:
    ```
-   Edge = √(Gx² + Gy²) × 2.5
+   canh = √(canh_x² + canh_y²) × 2.5
    ```
 
-4. Đảo ngược: `edges_inv = 255 - edges`
+4. Đảo ngược: `canh_dao = 255 - canh`
 
 **Mục đích:** Tạo nét vẽ sắc nét
 
@@ -239,11 +241,11 @@ detect_edges(gray_image)
 
 #### **Bước 7: Color Dodge Blending**
 ```python
-color_dodge(gray_image, inverted_blurred)
+tron_mau_color_dodge(anh_xam, anh_mo_dao)
 ```
 **Công thức:**
 ```
-Result = (Base / (255 - Blend)) × 255
+ket_qua = (nen_float / (255 - tron_float)) × 255
 ```
 
 **Đặc điểm:**
@@ -257,12 +259,12 @@ Result = (Base / (255 - Blend)) × 255
 
 #### **Bước 8: Kết hợp nét vẽ cạnh**
 ```python
-multiply_images(sketch, edges_inv_normalized)
+nhan_hai_anh(phac_thao, canh_dao_chuan_hoa)
 ```
 **Quy trình:**
-1. Chuẩn hóa edges: `edges_norm = edges / 255`
-2. Làm đậm: `edges_norm = edges_norm^0.6`
-3. Nhân element-wise: `result = sketch × edges_norm`
+1. Chuẩn hóa edges: `canh_dao_chuan_hoa = canh_dao / 255`
+2. Làm đậm: `canh_dao_chuan_hoa = canh_dao_chuan_hoa^0.6`
+3. Nhân element-wise: `phac_thao = phac_thao × canh_dao_chuan_hoa`
 
 **Mục đích:** Thêm độ sắc nét cho nét vẽ
 
@@ -270,24 +272,24 @@ multiply_images(sketch, edges_inv_normalized)
 
 #### **Bước 9: Điều chỉnh Contrast & Brightness**
 ```python
-adjust_contrast(sketch, contrast=1.1)
-sketch = sketch + brightness (50)
+dieu_chinh_tuong_phan(phac_thao, tuong_phan=1.1)
+phac_thao = phac_thao + do_sang (50)
 ```
 **Quy trình:**
 1. Điều chỉnh contrast:
    ```
-   adjusted = (image - 128) × 1.1 + 128
+   da_dieu_chinh = (anh_float - 128) × 1.1 + 128
    ```
 
 2. Tăng độ sáng:
    ```
-   adjusted = adjusted + 50
+   phac_thao = da_dieu_chinh + 50
    ```
 
 3. Thêm noise nhẹ:
    ```
-   noise = random.normal(0, 2, shape)
-   result = adjusted + noise
+   nhieu = random.normal(0, 2, shape)
+   phac_thao = phac_thao + nhieu
    ```
 
 **Mục đích:** Tạo hiệu ứng tự nhiên, giống vẽ tay
@@ -349,7 +351,7 @@ Hiển thị thông báo thành công
 **Quy trình:**
 1. Chuẩn hóa: `clip(0, 255)` → `uint8`
 2. Chuyển NumPy → PIL Image
-3. Resize về tối đa 550x550 (giữ tỷ lệ)
+3. Resize về tối đa 550x550 (giữ tỷ lệ) - Hàm: `thay_doi_kich_thuoc_anh()`
 4. Chuyển PIL → ImageTk
 5. Cập nhật Label
 6. Giữ reference tránh garbage collection
@@ -551,18 +553,18 @@ BẮT ĐẦU XỬ LÝ (LOGIC TỐI ƯU)
 ## 🎓 Thuật toán nền tảng
 
 ### **Computer Vision:**
-1. **Grayscale Conversion** - Chuyển màu sang xám
-2. **Image Inversion** - Đảo ngược màu
-3. **Gaussian Blur** - Làm mờ Gaussian
-4. **Bilateral Filtering** - Lọc song phương
-5. **Edge Detection (Sobel)** - Phát hiện cạnh
-6. **Color Dodge** - Blending mode
-7. **Image Multiplication** - Nhân ảnh
-8. **Contrast Adjustment** - Điều chỉnh tương phản
+1. **Grayscale Conversion** - Chuyển màu sang xám (`chuyen_rgb_sang_xam`)
+2. **Image Inversion** - Đảo ngược màu (`dao_nguoc_anh`)
+3. **Gaussian Blur** - Làm mờ Gaussian (`lam_mo_gaussian`, `tao_kernel_gaussian`)
+4. **Bilateral Filtering** - Lọc song phương (`bo_loc_song_phuong_toi_uu`)
+5. **Edge Detection (Sobel)** - Phát hiện cạnh (`phat_hien_canh`)
+6. **Color Dodge** - Blending mode (`tron_mau_color_dodge`)
+7. **Image Multiplication** - Nhân ảnh (`nhan_hai_anh`)
+8. **Contrast Adjustment** - Điều chỉnh tương phản (`dieu_chinh_tuong_phan`)
 
 ### **Image Processing:**
-- Convolution 2D
-- Bilinear Interpolation
+- Convolution 2D (`ap_dung_tich_chap`)
+- Bilinear Interpolation (`thay_doi_kich_thuoc_anh`)
 - Padding (reflect mode)
 - Normalization & Clipping
 

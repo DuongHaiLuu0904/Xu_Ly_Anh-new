@@ -6,7 +6,6 @@ import xu_ly_anh_toi_uu
 
 
 class UngDungPhacThao:
-    
     def __init__(self, cua_so_chinh):
         self.cua_so_chinh = cua_so_chinh
         self.cua_so_chinh.title("Chuyển đổi ảnh thành phác thảo bút chì")
@@ -217,7 +216,6 @@ class UngDungPhacThao:
         self.thanh_trang_thai.pack(side=tk.BOTTOM, fill=tk.X)
     
     def tao_slider(self, parent, ten, bien, min_val, max_val, resolution, mo_ta, hang):
-        """Tạo một slider với nhãn và giá trị hiển thị"""
         frame = tk.Frame(parent, bg="#34495e")
         frame.grid(row=hang, column=0, columnspan=3, sticky="ew", padx=10, pady=5)
         
@@ -466,7 +464,6 @@ def main():
     """Hàm chính chạy ứng dụng"""
     cua_so = tk.Tk()
     ung_dung = UngDungPhacThao(cua_so)
-    cua_so.mainloop()
 
 
 if __name__ == "__main__":

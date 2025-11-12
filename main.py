@@ -8,7 +8,7 @@ import xu_ly_anh_toi_uu
 class UngDungPhacThao:
     def __init__(self, cua_so_chinh):
         self.cua_so_chinh = cua_so_chinh
-        self.cua_so_chinh.title("Chuyển đổi ảnh thành phác thảo bút chì")
+        self.cua_so_chinh.title("phần mềm chuyển ảnh thành Tranh vẽ")
         self.cua_so_chinh.geometry("1400x800")
         
         # Biến lưu trữ ảnh
@@ -54,7 +54,7 @@ class UngDungPhacThao:
         # Nút xử lý ảnh
         nut_xu_ly = tk.Button(
             khung_nut,
-            text="🎨 Chuyển thành phác thảo",
+            text="🎨 Chuyển thành tranh vẽ",
             command=self.xu_ly_anh,
             font=("Arial", 12, "bold"),
             bg="#e74c3c",
@@ -82,7 +82,7 @@ class UngDungPhacThao:
         # Nút cập nhật nhanh (áp dụng tham số mới không cần xử lý lại từ đầu)
         nut_cap_nhat = tk.Button(
             khung_nut,
-            text="⚡ Cập nhật nhanh",
+            text="⚡ Cập nhật",
             command=self.cap_nhat_nhanh,
             font=("Arial", 12, "bold"),
             bg="#f39c12",
@@ -100,7 +100,7 @@ class UngDungPhacThao:
         # Tiêu đề
         tk.Label(
             khung_tham_so,
-            text="⚙️ Tham số phác thảo (Thay đổi và nhấn 'Cập nhật nhanh')",
+            text="⚙️ Tham số phác thảo (Thay đổi và nhấn 'Cập nhật')",
             font=("Arial", 10, "bold"),
             bg="#34495e",
             fg="white"
@@ -186,7 +186,7 @@ class UngDungPhacThao:
         # Khung ảnh kết quả
         khung_ket_qua = tk.LabelFrame(
             khung_anh,
-            text="Ảnh phác thảo",
+            text="Tranh vẽ",
             font=("Arial", 11, "bold"),
             bg="#ecf0f1",
             fg="#2c3e50"
@@ -464,7 +464,7 @@ def main():
     """Hàm chính chạy ứng dụng"""
     cua_so = tk.Tk()
     ung_dung = UngDungPhacThao(cua_so)
-
+    cua_so.mainloop()
 
 if __name__ == "__main__":
     main()

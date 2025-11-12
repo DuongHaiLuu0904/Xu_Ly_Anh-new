@@ -9,17 +9,17 @@ except ImportError:
 
 
 def thay_doi_kich_thuoc_anh(anh, chieu_rong_moi, chieu_cao_moi):
-    """
-    Resize ảnh bằng phương pháp bilinear interpolation
     
-    Tham số:
-        anh: Ảnh đầu vào (numpy array)
-        chieu_rong_moi: Chiều rộng mới
-        chieu_cao_moi: Chiều cao mới
+    # Resize ảnh bằng phương pháp bilinear interpolation
     
-    Trả về:
-        Ảnh đã resize
-    """
+    # Tham số:
+    #     anh: Ảnh đầu vào (numpy array)
+    #     chieu_rong_moi: Chiều rộng mới
+    #     chieu_cao_moi: Chiều cao mới
+    
+    # Trả về:
+    #     Ảnh đã resize
+    
     # Lấy kích thước ảnh gốc
     chieu_cao, chieu_rong = anh.shape[:2]
     
@@ -77,29 +77,29 @@ def thay_doi_kich_thuoc_anh(anh, chieu_rong_moi, chieu_cao_moi):
 
 
 def nhan_hai_anh(anh1, anh2):
-    """
-    Nhân hai ảnh với nhau (element-wise multiplication)
     
-    Tham số:
-        anh1: Ảnh thứ nhất (numpy array)
-        anh2: Ảnh thứ hai (numpy array)
+    # Nhân hai ảnh với nhau (element-wise multiplication)
     
-    Trả về:
-        Kết quả nhân hai ảnh
-    """
+    # Tham số:
+    #     anh1: Ảnh thứ nhất (numpy array)
+    #     anh2: Ảnh thứ hai (numpy array)
+    
+    # Trả về:
+    #     Kết quả nhân hai ảnh
+    
     return anh1 * anh2
 
 
 def chuyen_rgb_sang_xam(anh):
-    """
-    Chuyển RGB sang grayscale
     
-    Tham số:
-        anh: Ảnh BGR (OpenCV format)
+    # Chuyển RGB sang grayscale
     
-    Trả về:
-        Ảnh xám (numpy array)
-    """
+    # Tham số:
+    #     anh: Ảnh BGR (OpenCV format)
+    
+    # Trả về:
+    #     Ảnh xám (numpy array)
+    
     if len(anh.shape) == 3:
         # Tách 3 kênh màu BGR
         b = anh[:, :, 0].astype(np.float32)
@@ -119,16 +119,16 @@ def dao_nguoc_anh(anh):
 
 
 def tao_kernel_gaussian(kich_thuoc, sigma):
-    """
-    Tạo kernel Gaussian
     
-    Tham số:
-        kich_thuoc: Kích thước kernel (số lẻ)
-        sigma: Độ lệch chuẩn
+    # Tạo kernel Gaussian
     
-    Trả về:
-        Kernel Gaussian đã chuẩn hóa
-    """
+    # Tham số:
+    #     kich_thuoc: Kích thước kernel (số lẻ)
+    #     sigma: Độ lệch chuẩn
+    
+    # Trả về:
+    #     Kernel Gaussian đã chuẩn hóa
+    
     # Đảm bảo kích thước kernel là số lẻ để có tâm đối xứng
     kich_thuoc = kich_thuoc if kich_thuoc % 2 == 1 else kich_thuoc + 1
     tam = kich_thuoc // 2
@@ -149,16 +149,16 @@ def tao_kernel_gaussian(kich_thuoc, sigma):
 
 
 def ap_dung_tich_chap(anh, kernel):
-    """
-    Áp dụng convolution 2D
     
-    Tham số:
-        anh: Ảnh đầu vào
-        kernel: Kernel convolution
+    # Áp dụng convolution 2D
     
-    Trả về:
-        Ảnh sau khi convolution
-    """
+    # Tham số:
+    #     anh: Ảnh đầu vào
+    #     kernel: Kernel convolution
+    
+    # Trả về:
+    #     Ảnh sau khi convolution
+    
     chieu_cao, chieu_rong = anh.shape
     chieu_cao_k, chieu_rong_k = kernel.shape
     # Tính padding cần thiết để giữ nguyên kích thước ảnh
@@ -184,17 +184,17 @@ def ap_dung_tich_chap(anh, kernel):
 
 
 def lam_mo_gaussian(anh, kich_thuoc_kernel, sigma):
-    """
-    Làm mờ Gaussian
     
-    Tham số:
-        anh: Ảnh đầu vào
-        kich_thuoc_kernel: Kích thước kernel
-        sigma: Độ lệch chuẩn
+    # Làm mờ Gaussian
     
-    Trả về:
-        Ảnh đã làm mờ
-    """
+    # Tham số:
+    #     anh: Ảnh đầu vào
+    #     kich_thuoc_kernel: Kích thước kernel
+    #     sigma: Độ lệch chuẩn
+    
+    # Trả về:
+    #     Ảnh đã làm mờ
+    
     kernel = tao_kernel_gaussian(kich_thuoc_kernel, sigma)
     return ap_dung_tich_chap(anh, kernel)
 
@@ -516,6 +516,7 @@ def chuyen_thanh_phac_thao(anh_bgr, kernel_gaussian=15, sigma_gaussian=3,
     phac_thao = (phac_thao * 255).astype(np.uint8)
     print(f"  ✓ Hoàn thành ({time.time()-t8:.2f}s)")
     
+
 
 
     # Bước 9: Điều chỉnh Contrast & Brightness

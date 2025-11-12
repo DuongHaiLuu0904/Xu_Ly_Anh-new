@@ -1,11 +1,3 @@
-"""
-Module xử lý ảnh TỐI ƯU - Logic từ BTLXLA.py
-Tất cả thuật toán được tối ưu với:
-- Downsampling tự động
-- Pre-compute spatial weights
-- Vectorization với NumPy
-- Batch processing
-"""
 
 import numpy as np
 try:
@@ -109,15 +101,6 @@ def rgb_to_grayscale(image):
 
 
 def invert_image(image):
-    """
-    Đảo ngược ảnh (255 - pixel)
-    
-    Tham số:
-        image: Ảnh xám
-    
-    Trả về:
-        Ảnh đã đảo ngược
-    """
     return 255 - image
 
 
@@ -191,9 +174,6 @@ def gaussian_blur(image, kernel_size, sigma):
 
 def bilateral_filter_optimized(image, d, sigma_color, sigma_space):
     """
-    Bilateral filter TỐI ƯU từ BTLXLA.py
-    
-    Tối ưu:
     - Downsampling tự động (ảnh > 500px)
     - Pre-compute spatial weights (tính 1 lần)
     - Vectorization (NumPy operations)
@@ -244,7 +224,6 @@ def bilateral_filter_optimized(image, d, sigma_color, sigma_space):
     padded = np.pad(image_small, radius, mode='reflect')
     output = np.zeros_like(image_small, dtype=np.float32)
     
-    print("  🚀 Bilateral Filter tối ưu (nhanh hơn 10-20x)...")
     
     # TỐI ƯU 3: Batch processing
     batch_size = 50
@@ -436,6 +415,7 @@ def convert_to_sketch(image_bgr, gaussian_kernel=15, gaussian_sigma=3,
     edges = detect_edges(gray_image)
     edges_inv = 255 - edges
     print(f"  ✓ Hoàn thành ({time.time()-t6:.2f}s)")
+    
     
     # Bước 7: Color Dodge Blending
     print("\n[7/9] Color Dodge Blending...")

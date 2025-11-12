@@ -305,7 +305,7 @@ class UngDungPhacThao:
                 self.thanh_trang_thai.config(text="Lỗi khi tải ảnh")
     
     def xu_ly_anh(self):
-        """Xử lý chuyển đổi ảnh thành phác thảo - SỬ DỤNG MODULE TỐI ƯU"""
+        """Xử lý chuyển đổi ảnh thành phác thảo """
         if self.anh_goc is None:
             messagebox.showwarning("Cảnh báo", "Vui lòng tải ảnh lên trước!")
             return

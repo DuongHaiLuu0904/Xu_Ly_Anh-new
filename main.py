@@ -323,15 +323,15 @@ class UngDungPhacThao:
                 anh_bgr = self.anh_goc.astype(np.uint8)
             
             # Gọi hàm xử lý chính từ module tối ưu
-            sketch, tong_thoi_gian = xu_ly_anh_toi_uu.convert_to_sketch(
+            sketch, tong_thoi_gian = xu_ly_anh_toi_uu.chuyen_thanh_phac_thao(
                 anh_bgr,
-                gaussian_kernel=15,
-                gaussian_sigma=3,
-                bilateral_kernel=5,
-                sigma_color=50,
-                sigma_space=50,
-                contrast=1.1,
-                brightness=50
+                kernel_gaussian=15,
+                sigma_gaussian=3,
+                kernel_song_phuong=5,
+                sigma_mau=50,
+                sigma_khong_gian=50,
+                tuong_phan=1.1,
+                do_sang=50
             )
             
             # Lưu kết quả
@@ -370,7 +370,7 @@ class UngDungPhacThao:
             
             # Áp dụng điều chỉnh độ tương phản dựa trên blend
             contrast_factor = 0.8 + (blend_val * 0.4)  # 0.8 - 1.2
-            adjusted = xu_ly_anh_toi_uu.adjust_contrast(self.anh_min, contrast_factor)
+            adjusted = xu_ly_anh_toi_uu.dieu_chinh_tuong_phan(self.anh_min, contrast_factor)
             
             # Áp dụng brightness dựa trên sigma
             brightness_add = int((sigma_val - 1.0) * 30)  # -15 đến +30

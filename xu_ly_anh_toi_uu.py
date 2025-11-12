@@ -2,177 +2,177 @@
 import numpy as np
 try:
     from scipy.ndimage import zoom
-    HAS_SCIPY = True
+    CO_SCIPY = True
 except ImportError:
-    HAS_SCIPY = False
+    CO_SCIPY = False
     print("⚠️ scipy không có sẵn - sẽ dùng resize thủ công (chậm hơn)")
 
 
-def resize_image(image, new_width, new_height):
+def thay_doi_kich_thuoc_anh(anh, chieu_rong_moi, chieu_cao_moi):
     """
     Resize ảnh bằng phương pháp bilinear interpolation
     
     Tham số:
-        image: Ảnh đầu vào (numpy array)
-        new_width: Chiều rộng mới
-        new_height: Chiều cao mới
+        anh: Ảnh đầu vào (numpy array)
+        chieu_rong_moi: Chiều rộng mới
+        chieu_cao_moi: Chiều cao mới
     
     Trả về:
         Ảnh đã resize
     """
-    height, width = image.shape[:2]
+    chieu_cao, chieu_rong = anh.shape[:2]
     
     # Tính tỷ lệ scale
-    scale_y = height / new_height
-    scale_x = width / new_width
+    ty_le_y = chieu_cao / chieu_cao_moi
+    ty_le_x = chieu_rong / chieu_rong_moi
     
     # Tạo ảnh output
-    if len(image.shape) == 3:
-        resized = np.zeros((new_height, new_width, image.shape[2]), dtype=image.dtype)
+    if len(anh.shape) == 3:
+        anh_da_resize = np.zeros((chieu_cao_moi, chieu_rong_moi, anh.shape[2]), dtype=anh.dtype)
     else:
-        resized = np.zeros((new_height, new_width), dtype=image.dtype)
+        anh_da_resize = np.zeros((chieu_cao_moi, chieu_rong_moi), dtype=anh.dtype)
     
     # Bilinear interpolation
-    for i in range(new_height):
-        for j in range(new_width):
+    for i in range(chieu_cao_moi):
+        for j in range(chieu_rong_moi):
             # Tìm vị trí trong ảnh gốc
-            src_y = i * scale_y
-            src_x = j * scale_x
+            nguon_y = i * ty_le_y
+            nguon_x = j * ty_le_x
             
             # Tìm 4 điểm lân cận
-            y0 = int(np.floor(src_y))
-            y1 = min(y0 + 1, height - 1)
-            x0 = int(np.floor(src_x))
-            x1 = min(x0 + 1, width - 1)
+            y0 = int(np.floor(nguon_y))
+            y1 = min(y0 + 1, chieu_cao - 1)
+            x0 = int(np.floor(nguon_x))
+            x1 = min(x0 + 1, chieu_rong - 1)
             
             # Tính trọng số
-            dy = src_y - y0
-            dx = src_x - x0
+            dy = nguon_y - y0
+            dx = nguon_x - x0
             
             # Interpolation
-            if len(image.shape) == 3:
-                for c in range(image.shape[2]):
-                    val = (image[y0, x0, c] * (1 - dx) * (1 - dy) +
-                           image[y0, x1, c] * dx * (1 - dy) +
-                           image[y1, x0, c] * (1 - dx) * dy +
-                           image[y1, x1, c] * dx * dy)
-                    resized[i, j, c] = val
+            if len(anh.shape) == 3:
+                for c in range(anh.shape[2]):
+                    gia_tri = (anh[y0, x0, c] * (1 - dx) * (1 - dy) +
+                           anh[y0, x1, c] * dx * (1 - dy) +
+                           anh[y1, x0, c] * (1 - dx) * dy +
+                           anh[y1, x1, c] * dx * dy)
+                    anh_da_resize[i, j, c] = gia_tri
             else:
-                val = (image[y0, x0] * (1 - dx) * (1 - dy) +
-                       image[y0, x1] * dx * (1 - dy) +
-                       image[y1, x0] * (1 - dx) * dy +
-                       image[y1, x1] * dx * dy)
-                resized[i, j] = val
+                gia_tri = (anh[y0, x0] * (1 - dx) * (1 - dy) +
+                       anh[y0, x1] * dx * (1 - dy) +
+                       anh[y1, x0] * (1 - dx) * dy +
+                       anh[y1, x1] * dx * dy)
+                anh_da_resize[i, j] = gia_tri
     
-    return resized
+    return anh_da_resize
 
 
-def multiply_images(image1, image2):
+def nhan_hai_anh(anh1, anh2):
     """
     Nhân hai ảnh với nhau (element-wise multiplication)
     
     Tham số:
-        image1: Ảnh thứ nhất (numpy array)
-        image2: Ảnh thứ hai (numpy array)
+        anh1: Ảnh thứ nhất (numpy array)
+        anh2: Ảnh thứ hai (numpy array)
     
     Trả về:
         Kết quả nhân hai ảnh
     """
-    return image1 * image2
+    return anh1 * anh2
 
 
-def rgb_to_grayscale(image):
+def chuyen_rgb_sang_xam(anh):
     """
     Chuyển RGB sang grayscale
     
     Tham số:
-        image: Ảnh BGR (OpenCV format)
+        anh: Ảnh BGR (OpenCV format)
     
     Trả về:
         Ảnh xám (numpy array)
     """
-    if len(image.shape) == 3:
-        b = image[:, :, 0].astype(np.float32)
-        g = image[:, :, 1].astype(np.float32)
-        r = image[:, :, 2].astype(np.float32)
-        gray = 0.114 * b + 0.587 * g + 0.299 * r
-        return gray.astype(np.uint8)
-    return image
+    if len(anh.shape) == 3:
+        b = anh[:, :, 0].astype(np.float32)
+        g = anh[:, :, 1].astype(np.float32)
+        r = anh[:, :, 2].astype(np.float32)
+        anh_xam = 0.114 * b + 0.587 * g + 0.299 * r
+        return anh_xam.astype(np.uint8)
+    return anh
 
 
-def invert_image(image):
-    return 255 - image
+def dao_nguoc_anh(anh):
+    return 255 - anh
 
 
-def create_gaussian_kernel(size, sigma):
+def tao_kernel_gaussian(kich_thuoc, sigma):
     """
     Tạo kernel Gaussian
     
     Tham số:
-        size: Kích thước kernel (số lẻ)
+        kich_thuoc: Kích thước kernel (số lẻ)
         sigma: Độ lệch chuẩn
     
     Trả về:
         Kernel Gaussian đã chuẩn hóa
     """
-    size = size if size % 2 == 1 else size + 1
-    center = size // 2
-    kernel = np.zeros((size, size), dtype=np.float32)
+    kich_thuoc = kich_thuoc if kich_thuoc % 2 == 1 else kich_thuoc + 1
+    tam = kich_thuoc // 2
+    kernel = np.zeros((kich_thuoc, kich_thuoc), dtype=np.float32)
     
-    for i in range(size):
-        for j in range(size):
-            x = i - center
-            y = j - center
+    for i in range(kich_thuoc):
+        for j in range(kich_thuoc):
+            x = i - tam
+            y = j - tam
             kernel[i, j] = np.exp(-(x*x + y*y) / (2 * sigma * sigma))
     
     kernel = kernel / np.sum(kernel)
     return kernel
 
 
-def apply_convolution(image, kernel):
+def ap_dung_tich_chap(anh, kernel):
     """
     Áp dụng convolution 2D
     
     Tham số:
-        image: Ảnh đầu vào
+        anh: Ảnh đầu vào
         kernel: Kernel convolution
     
     Trả về:
         Ảnh sau khi convolution
     """
-    height, width = image.shape
-    k_height, k_width = kernel.shape
-    pad_h = k_height // 2
-    pad_w = k_width // 2
+    chieu_cao, chieu_rong = anh.shape
+    chieu_cao_k, chieu_rong_k = kernel.shape
+    pad_h = chieu_cao_k // 2
+    pad_w = chieu_rong_k // 2
     
-    padded = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)), mode='reflect')
-    output = np.zeros((height, width), dtype=np.float32)
+    anh_padding = np.pad(anh, ((pad_h, pad_h), (pad_w, pad_w)), mode='reflect')
+    ket_qua = np.zeros((chieu_cao, chieu_rong), dtype=np.float32)
     
-    for i in range(height):
-        for j in range(width):
-            region = padded[i:i+k_height, j:j+k_width]
-            output[i, j] = np.sum(region * kernel)
+    for i in range(chieu_cao):
+        for j in range(chieu_rong):
+            vung = anh_padding[i:i+chieu_cao_k, j:j+chieu_rong_k]
+            ket_qua[i, j] = np.sum(vung * kernel)
     
-    return np.clip(output, 0, 255).astype(np.uint8)
+    return np.clip(ket_qua, 0, 255).astype(np.uint8)
 
 
-def gaussian_blur(image, kernel_size, sigma):
+def lam_mo_gaussian(anh, kich_thuoc_kernel, sigma):
     """
     Làm mờ Gaussian
     
     Tham số:
-        image: Ảnh đầu vào
-        kernel_size: Kích thước kernel
+        anh: Ảnh đầu vào
+        kich_thuoc_kernel: Kích thước kernel
         sigma: Độ lệch chuẩn
     
     Trả về:
         Ảnh đã làm mờ
     """
-    kernel = create_gaussian_kernel(kernel_size, sigma)
-    return apply_convolution(image, kernel)
+    kernel = tao_kernel_gaussian(kich_thuoc_kernel, sigma)
+    return ap_dung_tich_chap(anh, kernel)
 
 
-def bilateral_filter_optimized(image, d, sigma_color, sigma_space):
+def bo_loc_song_phuong_toi_uu(anh, d, sigma_mau, sigma_khong_gian):
     """
     - Downsampling tự động (ảnh > 500px)
     - Pre-compute spatial weights (tính 1 lần)
@@ -180,110 +180,110 @@ def bilateral_filter_optimized(image, d, sigma_color, sigma_space):
     - Batch processing (50 dòng/lần)
     
     Tham số:
-        image: Ảnh xám đầu vào
+        anh: Ảnh xám đầu vào
         d: Đường kính vùng lân cận
-        sigma_color: Độ lệch chuẩn màu
-        sigma_space: Độ lệch chuẩn không gian
+        sigma_mau: Độ lệch chuẩn màu
+        sigma_khong_gian: Độ lệch chuẩn không gian
     
     Trả về:
         Ảnh đã làm mịn
     """
-    height, width = image.shape
+    chieu_cao, chieu_rong = anh.shape
     
     # TỐI ƯU 1: Downsampling
-    scale_factor = 1.0
-    if max(height, width) > 500:
-        scale_factor = 500.0 / max(height, width)
-        new_h = int(height * scale_factor)
-        new_w = int(width * scale_factor)
+    ty_le_scale = 1.0
+    if max(chieu_cao, chieu_rong) > 500:
+        ty_le_scale = 500.0 / max(chieu_cao, chieu_rong)
+        chieu_cao_moi = int(chieu_cao * ty_le_scale)
+        chieu_rong_moi = int(chieu_rong * ty_le_scale)
         
-        if HAS_SCIPY:
-            image_small = zoom(image, scale_factor, order=1)
+        if CO_SCIPY:
+            anh_nho = zoom(anh, ty_le_scale, order=1)
         else:
             # Resize thủ công
-            step_h = max(1, int(1 / scale_factor))
-            step_w = max(1, int(1 / scale_factor))
-            image_small = image[::step_h, ::step_w]
+            buoc_h = max(1, int(1 / ty_le_scale))
+            buoc_w = max(1, int(1 / ty_le_scale))
+            anh_nho = anh[::buoc_h, ::buoc_w]
         
-        print(f"  📉 Downsampling: {height}x{width} → {new_h}x{new_w} (tăng tốc x{1/scale_factor:.1f})")
+        print(f"  📉 Downsampling: {chieu_cao}x{chieu_rong} → {chieu_cao_moi}x{chieu_rong_moi} (tăng tốc x{1/ty_le_scale:.1f})")
     else:
-        image_small = image
+        anh_nho = anh
     
-    h_small, w_small = image_small.shape
-    radius = d // 2
+    cao_nho, rong_nho = anh_nho.shape
+    ban_kinh = d // 2
     
     # TỐI ƯU 2: Pre-compute spatial weights (chỉ tính 1 lần)
-    spatial_weights = np.zeros((d, d), dtype=np.float32)
-    for ki in range(-radius, radius + 1):
-        for kj in range(-radius, radius + 1):
-            spatial_dist = ki*ki + kj*kj
-            spatial_weights[ki + radius, kj + radius] = np.exp(
-                -spatial_dist / (2 * sigma_space * sigma_space)
+    trong_so_khong_gian = np.zeros((d, d), dtype=np.float32)
+    for ki in range(-ban_kinh, ban_kinh + 1):
+        for kj in range(-ban_kinh, ban_kinh + 1):
+            khoang_cach_khong_gian = ki*ki + kj*kj
+            trong_so_khong_gian[ki + ban_kinh, kj + ban_kinh] = np.exp(
+                -khoang_cach_khong_gian / (2 * sigma_khong_gian * sigma_khong_gian)
             )
     
-    padded = np.pad(image_small, radius, mode='reflect')
-    output = np.zeros_like(image_small, dtype=np.float32)
+    anh_padding = np.pad(anh_nho, ban_kinh, mode='reflect')
+    ket_qua = np.zeros_like(anh_nho, dtype=np.float32)
     
     
     # TỐI ƯU 3: Batch processing
-    batch_size = 50
+    kich_thuoc_batch = 50
     
-    for batch_start in range(0, h_small, batch_size):
-        batch_end = min(batch_start + batch_size, h_small)
+    for bat_dau_batch in range(0, cao_nho, kich_thuoc_batch):
+        ket_thuc_batch = min(bat_dau_batch + kich_thuoc_batch, cao_nho)
         
         # TỐI ƯU 4: Vectorization
-        for i in range(batch_start, batch_end):
-            for j in range(w_small):
-                center_value = padded[i + radius, j + radius]
+        for i in range(bat_dau_batch, ket_thuc_batch):
+            for j in range(rong_nho):
+                gia_tri_tam = anh_padding[i + ban_kinh, j + ban_kinh]
                 
                 # TỐI ƯU 5: Lấy toàn bộ vùng một lần
-                region = padded[i:i+d, j:j+d].astype(np.float32)
+                vung = anh_padding[i:i+d, j:j+d].astype(np.float32)
                 
                 # Vectorized computation
-                value_diffs = region - float(center_value)
-                range_weights = np.exp(
-                    -(value_diffs * value_diffs) / (2 * sigma_color * sigma_color)
+                chenh_lech_gia_tri = vung - float(gia_tri_tam)
+                trong_so_mau = np.exp(
+                    -(chenh_lech_gia_tri * chenh_lech_gia_tri) / (2 * sigma_mau * sigma_mau)
                 )
                 
-                combined_weights = spatial_weights * range_weights
-                weight_sum = np.sum(combined_weights)
+                trong_so_ket_hop = trong_so_khong_gian * trong_so_mau
+                tong_trong_so = np.sum(trong_so_ket_hop)
                 
-                if weight_sum > 0:
-                    output[i, j] = np.sum(region * combined_weights) / weight_sum
+                if tong_trong_so > 0:
+                    ket_qua[i, j] = np.sum(vung * trong_so_ket_hop) / tong_trong_so
                 else:
-                    output[i, j] = center_value
+                    ket_qua[i, j] = gia_tri_tam
         
-        progress = int((batch_end) / h_small * 100)
-        print(f"    Tiến độ: {progress}%", end='\r')
+        tien_do = int((ket_thuc_batch) / cao_nho * 100)
+        print(f"    Tiến độ: {tien_do}%", end='\r')
     
     print()
     
     # TỐI ƯU 6: Upsampling nếu cần
-    if scale_factor < 1.0:
-        if HAS_SCIPY:
-            output = zoom(output, 1.0/scale_factor, order=1)
-            output = output[:height, :width]
+    if ty_le_scale < 1.0:
+        if CO_SCIPY:
+            ket_qua = zoom(ket_qua, 1.0/ty_le_scale, order=1)
+            ket_qua = ket_qua[:chieu_cao, :chieu_rong]
         else:
             # Upsampling thủ công
-            output_full = np.zeros((height, width), dtype=np.float32)
-            for i in range(height):
-                for j in range(width):
-                    i_small = int(i * scale_factor)
-                    j_small = int(j * scale_factor)
-                    output_full[i, j] = output[min(i_small, h_small-1), min(j_small, w_small-1)]
-            output = output_full
+            ket_qua_day_du = np.zeros((chieu_cao, chieu_rong), dtype=np.float32)
+            for i in range(chieu_cao):
+                for j in range(chieu_rong):
+                    i_nho = int(i * ty_le_scale)
+                    j_nho = int(j * ty_le_scale)
+                    ket_qua_day_du[i, j] = ket_qua[min(i_nho, cao_nho-1), min(j_nho, rong_nho-1)]
+            ket_qua = ket_qua_day_du
         
-        print(f"  📈 Upsampling: {h_small}x{w_small} → {height}x{width}")
+        print(f"  📈 Upsampling: {cao_nho}x{rong_nho} → {chieu_cao}x{chieu_rong}")
     
-    return np.clip(output, 0, 255).astype(np.uint8)
+    return np.clip(ket_qua, 0, 255).astype(np.uint8)
 
 
-def detect_edges(image):
+def phat_hien_canh(anh):
     """
     Phát hiện cạnh bằng Sobel operator
     
     Tham số:
-        image: Ảnh xám
+        anh: Ảnh xám
     
     Trả về:
         Ảnh cạnh
@@ -291,82 +291,84 @@ def detect_edges(image):
     sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
     sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
     
-    height, width = image.shape
-    padded = np.pad(image, 1, mode='reflect')
+    chieu_cao, chieu_rong = anh.shape
+    anh_padding = np.pad(anh, 1, mode='reflect')
     
-    edges_x = np.zeros_like(image, dtype=np.float32)
-    edges_y = np.zeros_like(image, dtype=np.float32)
+    canh_x = np.zeros_like(anh, dtype=np.float32)
+    canh_y = np.zeros_like(anh, dtype=np.float32)
     
-    for i in range(height):
-        for j in range(width):
-            region = padded[i:i+3, j:j+3].astype(np.float32)
-            edges_x[i, j] = np.sum(region * sobel_x)
-            edges_y[i, j] = np.sum(region * sobel_y)
+    for i in range(chieu_cao):
+        for j in range(chieu_rong):
+            vung = anh_padding[i:i+3, j:j+3].astype(np.float32)
+            canh_x[i, j] = np.sum(vung * sobel_x)
+            canh_y[i, j] = np.sum(vung * sobel_y)
     
-    edges = np.sqrt(edges_x**2 + edges_y**2)
+    canh = np.sqrt(canh_x**2 + canh_y**2)
     
     # Tăng cường độ đậm của edges
-    edges = edges * 2.5
-    edges = np.clip(edges, 0, 255).astype(np.uint8)
+    canh = canh * 2.5
+    canh = np.clip(canh, 0, 255).astype(np.uint8)
     
-    return edges
+    return canh
 
 
-def color_dodge(base, blend):
+def tron_mau_color_dodge(nen, tron):
     """
     Color dodge blending mode
     
     Tham số:
-        base: Ảnh nền
-        blend: Ảnh blend
+        nen: Ảnh nền
+        tron: Ảnh blend
     
     Trả về:
         Ảnh sau blending
     """
-    base_float = base.astype(np.float32)
-    blend_float = blend.astype(np.float32)
+    nen_float = nen.astype(np.float32)
+    tron_float = tron.astype(np.float32)
     
-    inverted_blend = 255.0 - blend_float
-    inverted_blend = np.where(inverted_blend == 0, 1, inverted_blend)
+    tron_dao = 255.0 - tron_float
+    tron_dao = np.where(tron_dao == 0, 1, tron_dao)
     
-    result = (base_float / inverted_blend) * 255.0
-    result = np.clip(result, 0, 255)
+    ket_qua = (nen_float / tron_dao) * 255.0
+    ket_qua = np.clip(ket_qua, 0, 255)
     
-    return result.astype(np.uint8)
+    return ket_qua.astype(np.uint8)
 
 
-def adjust_contrast(image, contrast_factor):
+def dieu_chinh_tuong_phan(anh, he_so_tuong_phan):
     """
     Điều chỉnh contrast
     
     Tham số:
-        image: Ảnh đầu vào
-        contrast_factor: Hệ số contrast (1.0 = không thay đổi)
+        anh: Ảnh đầu vào
+        he_so_tuong_phan: Hệ số contrast (1.0 = không thay đổi)
     
     Trả về:
         Ảnh đã điều chỉnh contrast
     """
-    img_float = image.astype(np.float32)
-    adjusted = (img_float - 128.0) * contrast_factor + 128.0
-    adjusted = np.clip(adjusted, 0, 255)
-    return adjusted.astype(np.uint8)
+    anh_float = anh.astype(np.float32)
+    da_dieu_chinh = (anh_float - 128.0) * he_so_tuong_phan + 128.0
+    da_dieu_chinh = np.clip(da_dieu_chinh, 0, 255)
+    return da_dieu_chinh.astype(np.uint8)
 
 
-def convert_to_sketch(image_bgr, gaussian_kernel=15, gaussian_sigma=3,
-                     bilateral_kernel=5, sigma_color=50, sigma_space=50,
-                     contrast=1.1, brightness=50):
+
+
+def chuyen_thanh_phac_thao(anh_bgr, kernel_gaussian=15, sigma_gaussian=3,
+                     kernel_song_phuong=5, sigma_mau=50, sigma_khong_gian=50,
+                     tuong_phan=1.1, do_sang=50):
     """
     Pipeline chính: Chuyển ảnh màu thành phác thảo
     
     Tham số:
-        image_bgr: Ảnh BGR (OpenCV format)
-        gaussian_kernel: Kích thước kernel Gaussian
-        gaussian_sigma: Sigma cho Gaussian
-        bilateral_kernel: Kích thước kernel Bilateral
-        sigma_color: Sigma màu cho Bilateral
-        sigma_space: Sigma không gian cho Bilateral
-        contrast: Hệ số tương phản (1.0 = không đổi)
-        brightness: Độ sáng thêm vào (0-100)
+        anh_bgr: Ảnh BGR (OpenCV format)
+        kernel_gaussian: Kích thước kernel Gaussian
+        sigma_gaussian: Sigma cho Gaussian
+        kernel_song_phuong: Kích thước kernel Bilateral
+        sigma_mau: Sigma màu cho Bilateral
+        sigma_khong_gian: Sigma không gian cho Bilateral
+        tuong_phan: Hệ số tương phản (1.0 = không đổi)
+        do_sang: Độ sáng thêm vào (0-100)
     
     Trả về:
         Ảnh phác thảo
@@ -377,43 +379,43 @@ def convert_to_sketch(image_bgr, gaussian_kernel=15, gaussian_sigma=3,
     print("BẮT ĐẦU XỬ LÝ (LOGIC TỐI ƯU)")
     print("="*60)
     
-    total_start = time.time()
+    thoi_gian_bat_dau = time.time()
     
     # Bước 1: Chuyển sang ảnh xám
     print("\n[1/9] Chuyển ảnh xám...")
     t1 = time.time()
-    gray_image = rgb_to_grayscale(image_bgr)
+    anh_xam = chuyen_rgb_sang_xam(anh_bgr)
     print(f"  ✓ Hoàn thành ({time.time()-t1:.2f}s)")
     
     # Bước 2: Đảo ngược ảnh xám
     print("\n[2/9] Đảo ngược ảnh xám...")
     t2 = time.time()
-    inverted_gray = invert_image(gray_image)
+    anh_xam_dao = dao_nguoc_anh(anh_xam)
     print(f"  ✓ Hoàn thành ({time.time()-t2:.2f}s)")
     
     # Bước 3: Gaussian Blur
-    print(f"\n[3/9] Gaussian Blur (kernel={gaussian_kernel}, sigma={gaussian_sigma})...")
+    print(f"\n[3/9] Gaussian Blur (kernel={kernel_gaussian}, sigma={sigma_gaussian})...")
     t3 = time.time()
-    blurred = gaussian_blur(inverted_gray, gaussian_kernel, gaussian_sigma)
+    anh_mo = lam_mo_gaussian(anh_xam_dao, kernel_gaussian, sigma_gaussian)
     print(f"  ✓ Hoàn thành ({time.time()-t3:.2f}s)")
     
     # Bước 4: Bilateral Filter (CHẬM NHẤT - đã tối ưu)
-    print(f"\n[4/9] Bilateral Filter (d={bilateral_kernel})...")
+    print(f"\n[4/9] Bilateral Filter (d={kernel_song_phuong})...")
     t4 = time.time()
-    blurred = bilateral_filter_optimized(blurred, bilateral_kernel, sigma_color, sigma_space)
+    anh_mo = bo_loc_song_phuong_toi_uu(anh_mo, kernel_song_phuong, sigma_mau, sigma_khong_gian)
     print(f"  ✓ Hoàn thành ({time.time()-t4:.2f}s)")
     
     # Bước 5: Đảo ngược ảnh đã làm mờ
     print("\n[5/9] Đảo ngược ảnh đã làm mờ...")
     t5 = time.time()
-    inverted_blurred = invert_image(blurred)
+    anh_mo_dao = dao_nguoc_anh(anh_mo)
     print(f"  ✓ Hoàn thành ({time.time()-t5:.2f}s)")
     
     # Bước 6: Phát hiện cạnh
     print("\n[6/9] Phát hiện cạnh (tạo nét vẽ)...")
     t6 = time.time()
-    edges = detect_edges(gray_image)
-    edges_inv = 255 - edges
+    canh = phat_hien_canh(anh_xam)
+    canh_dao = 255 - canh
     print(f"  ✓ Hoàn thành ({time.time()-t6:.2f}s)")
     
     
@@ -421,41 +423,41 @@ def convert_to_sketch(image_bgr, gaussian_kernel=15, gaussian_sigma=3,
     print("\n[7/9] Color Dodge Blending...")
     t7 = time.time()
     # Đảm bảo cùng kích thước
-    if inverted_blurred.shape != gray_image.shape:
-        inverted_blurred = resize_image(inverted_blurred, gray_image.shape[1], gray_image.shape[0])
-    sketch = color_dodge(gray_image, inverted_blurred)
+    if anh_mo_dao.shape != anh_xam.shape:
+        anh_mo_dao = thay_doi_kich_thuoc_anh(anh_mo_dao, anh_xam.shape[1], anh_xam.shape[0])
+    phac_thao = tron_mau_color_dodge(anh_xam, anh_mo_dao)
     print(f"  ✓ Hoàn thành ({time.time()-t7:.2f}s)")
     
     # Bước 8: Kết hợp nét vẽ cạnh
     print("\n[8/9] Kết hợp nét vẽ cạnh...")
     t8 = time.time()
     # Đảm bảo cùng kích thước
-    if edges_inv.shape != sketch.shape:
-        edges_inv = resize_image(edges_inv, sketch.shape[1], sketch.shape[0])
+    if canh_dao.shape != phac_thao.shape:
+        canh_dao = thay_doi_kich_thuoc_anh(canh_dao, phac_thao.shape[1], phac_thao.shape[0])
     
     # Làm đậm edges
-    edges_inv_normalized = edges_inv.astype(np.float32) / 255.0
-    edges_inv_normalized = np.power(edges_inv_normalized, 0.6)
+    canh_dao_chuan_hoa = canh_dao.astype(np.float32) / 255.0
+    canh_dao_chuan_hoa = np.power(canh_dao_chuan_hoa, 0.6)
     
-    sketch = multiply_images(sketch.astype(np.float32) / 255.0, edges_inv_normalized)
-    sketch = (sketch * 255).astype(np.uint8)
+    phac_thao = nhan_hai_anh(phac_thao.astype(np.float32) / 255.0, canh_dao_chuan_hoa)
+    phac_thao = (phac_thao * 255).astype(np.uint8)
     print(f"  ✓ Hoàn thành ({time.time()-t8:.2f}s)")
     
     # Bước 9: Điều chỉnh Contrast & Brightness
     print("\n[9/9] Điều chỉnh Contrast & Brightness...")
     t9 = time.time()
-    sketch = adjust_contrast(sketch, contrast)
-    sketch = np.clip(sketch.astype(np.int16) + brightness, 0, 255).astype(np.uint8)
+    phac_thao = dieu_chinh_tuong_phan(phac_thao, tuong_phan)
+    phac_thao = np.clip(phac_thao.astype(np.int16) + do_sang, 0, 255).astype(np.uint8)
     
     # Thêm noise nhẹ
-    noise = np.random.normal(0, 2, sketch.shape).astype(np.int16)
-    sketch = np.clip(sketch.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+    nhieu = np.random.normal(0, 2, phac_thao.shape).astype(np.int16)
+    phac_thao = np.clip(phac_thao.astype(np.int16) + nhieu, 0, 255).astype(np.uint8)
     print(f"  ✓ Hoàn thành ({time.time()-t9:.2f}s)")
     
-    total_time = time.time() - total_start
+    tong_thoi_gian = time.time() - thoi_gian_bat_dau
     
     print("\n" + "="*60)
-    print(f"⚡ HOÀN THÀNH - Thời gian xử lý: {total_time:.2f} giây")
+    print(f"⚡ HOÀN THÀNH - Thời gian xử lý: {tong_thoi_gian:.2f} giây")
     print("="*60 + "\n")
     
-    return sketch, total_time
+    return phac_thao, tong_thoi_gian
